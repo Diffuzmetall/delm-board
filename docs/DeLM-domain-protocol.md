@@ -1,10 +1,10 @@
 # Доска, actor-bound CLI и протокол v2
 
-Это контракт Python-слоя пакета, не отчёт о работающей production-интеграции Native. Реализация: `scripts/delm_local.py`, `delm_domain.py`, `delm_delivery.py`, `delm_leases.py`; исходная основа — `vendor/DeLM/board/protected_board.py`.
+Это контракт самостоятельного Python-слоя пакета, не отчёт о production-интеграции с любым хостом. Реализация находится в `board/scripts/`: `delm_local.py`, `delm_domain.py`, `delm_delivery.py`, `delm_leases.py`; исходная основа — `board/vendor/DeLM/board/protected_board.py`.
 
 ## Владение и транспорт
 
-Python владеет событиями и задачами в существующей `context.sqlite`. Вложения используют attached `context-bodies.sqlite`. Native отдельно владеет исполнением. Никакого второго task tracker или владельца Native SQLite нет.
+Python владеет событиями и задачами в существующей `context.sqlite`. Вложения используют attached `context-bodies.sqlite`. Приложение участника отдельно владеет исполнением. Доска не открывает SQLite бесед Pi/Durable.
 
 Старые операции CLI остаются совместимыми. Новые идут через `context domain '<JSON object>'`: bound executable выбирает actor и локальный HTTP endpoint из приватной привязки. Модель не передаёт actor или credentials. Не публикуйте `config.json` и не подставляйте чужой token.
 
@@ -75,4 +75,4 @@ FAIL остаётся blocker у связанных задач и завися
 
 `project_events(rows, actors=())` — чистая функция: возвращает `protocol:2`, sequence, agents, queue (включая DONE), notes, blockers, sessions и всю историю events. Legacy item/claim/done/note/session не переписываются; неизвестные события остаются в истории. Receipt/lease tables создаются аддитивно в той же базе, с caller-owned транзакцией. Модули delivery/leases не открывают и не коммитят собственную БД.
 
-Legacy isolated-режим с `--source` остаётся отдельным сценарием: у участников свои workspaces. Shared-режим использует `--shared-workspace` и запрещает apply. Не переносите правила isolated-копирования в общую папку. Подробности эксплуатации — [operations.md](operations.md), ожиданий — [Native protocol](DeLM-native-protocol.md).
+Legacy isolated-режим с `--source` остаётся отдельным сценарием: у участников свои workspaces. Shared-режим использует `--shared-workspace` и запрещает apply. Не переносите правила isolated-копирования в общую папку. Порядок запуска описан в [README](../README.md), границы ожиданий — в [архитектуре](architecture.md) и [инструкции публичного Durable SDK](durable-sdk.md).

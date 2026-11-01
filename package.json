@@ -9,8 +9,8 @@
   "bin": { "delm": "bin/delm" },
   "exports": { "./durable": "./adapters/durable/index.mjs", "./pi": "./adapters/durable/pi.mjs" },
   "pi": { "extensions": ["./adapters/durable/pi.mjs"] },
-  "files": ["bin", "board", "adapters", "README.md", "LICENSE", "LICENSES", "THIRD_PARTY_NOTICES.md", "docs/verification.md", "docs/DeLM-domain-protocol.md"],
-  "scripts": { "test:core": "python3 -m unittest discover -s tests/core -q", "test:sdk": "node --test tests/sdk.test.mjs", "test:pi": "node --test tests/pi.test.mjs tests/pi-unconfigured.test.mjs", "test:rpc": "python3 tests/rpc.py" },
+  "files": ["bin", "board", "adapters", "README.md", "AGENTS.md", "prompts", "LICENSE", "LICENSES", "THIRD_PARTY_NOTICES.md", "docs/architecture.md", "docs/durable-sdk.md", "docs/verification.md", "docs/publication.md", "docs/DeLM-domain-protocol.md", "docs/evidence"],
+  "scripts": { "test:core": "python3 -m unittest discover -s tests/core -q", "test:sdk": "node --test tests/sdk.test.mjs", "test:pi": "node --test tests/pi.test.mjs tests/pi-unconfigured.test.mjs", "test:rpc": "python3 tests/rpc.py", "test:docs": "python3 tests/documentation.py" },
   "dependencies": {
     "@earendil-works/pi-ai": "1.4.0",
     "@earendil-works/pi-coding-agent": "1.4.0",

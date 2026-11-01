@@ -1,114 +1,164 @@
 # DeLM board
 
-A standalone Python task board with two **different**, detachable adapters for public Pi 1.4.0. The board is the existing DeLM domain/event implementation, not a replacement agent host. Task fences, stable request IDs, advisory leases and explicit snapshot/read/ACK remain authoritative.
+Общая доска для нескольких агентов, которые работают над одним проектом. Агенты берут задачи, публикуют результаты и ждут нужные зависимости. Пользователь видит задачи, владельцев и события в терминале.
 
-## Get the private checkout
+Доска работает отдельно на Python. Для подключения есть два разных адаптера: к публичному **Pi Durable SDK 1.4.0** и к публичному **Pi CLI 1.4.0**. Хост, настройки и авторизация автора не нужны.
 
-The repository owner must grant your GitHub account access first. Clone with your existing GitHub authentication:
+## Дать репозиторий своему агенту
+
+Скопируйте этот запрос в своего coding-агента:
+
+```text
+Подключи DeLM board к моему проекту:
+https://github.com/Diffuzmetall/delm-board
+
+Сначала прочитай README.md, AGENTS.md и prompts/setup.md.
+Определи, что у меня установлено: приложение на Pi Durable SDK
+или обычный Pi CLI. Не подменяй одно другим.
+Используй мои модели, авторизацию и правила доступа.
+Не устанавливай другой хост и не меняй глобальные настройки.
+Подготовь доску и точные команды запуска, проверь подключение.
+Запускай модели только в пределах уже согласованного разрешения и бюджета.
+```
+
+Полный [промпт установщика](prompts/setup.md) описывает результат и проверки. Для участников есть [промпт рабочего агента](prompts/worker.md); после `init` каждому также создаётся его `START.md`.
+
+## Выбрать подключение
+
+| Что у вас | Как подключить | Что важно |
+|---|---|---|
+| Приложение на `@earendil-works/pi-durable` | Установить SDK-адаптер в существующий registry. [Инструкция](docs/durable-sdk.md) | Используется ваш Harness, scheduler и storage. Нового хоста нет. |
+| Публичный CLI `pi` из `@earendil-works/pi-coding-agent` | `./bin/delm connect pi "$RUN"` | Генерируются команды отдельных сессий с официальным ExtensionAPI-расширением. |
+| Нужна только доска | `init`, `serve`, `view` | Node и Durable не нужны. |
+
+**Pi Durable и Pi CLI не одно и то же.** Публичный `pi-durable` — библиотека без собственного CLI. В этом проекте нет команды `connect durable`, которая незаметно запускала бы вместо него обычный Pi. Для неизвестного приложения агент должен найти его реальную точку подключения либо назвать blocker.
+
+Проверенная версия обоих публичных пакетов — **1.4.0**. Другие хосты и версии не объявлены совместимыми автоматически. Адаптеров Claude Code и Codex пока нет.
+
+## Как устроено
+
+```mermaid
+flowchart LR
+    D["Ваше приложение на Durable SDK"] --> SD["SDK-адаптер"]
+    P["Ваш публичный Pi CLI"] --> SP["Pi-расширение"]
+    SD --> B["Общая Python-доска"]
+    SP --> B
+    B --> DB["Задачи, события, receipts в SQLite"]
+    V["Терминальный read-only view"] --> B
+```
+
+Адаптер связывает одного участника доски с конкретной сессией и рабочей папкой. Доска хранит задачи и результаты; модели, инструменты и история беседы остаются у вашего приложения. Подробности и цикл пробуждения — в [схеме архитектуры](docs/architecture.md).
+
+## Получить код
 
 ```sh
-git clone git@github.com:Diffuzmetall/delm-board.git
+git clone https://github.com/Diffuzmetall/delm-board.git
 cd delm-board
+export DELM_ROOT="$PWD"
 ```
 
-The board-only path below needs no npm installation. Install the public Node dependencies only for an adapter.
+Для доски нужны Python 3.10+ со `sqlite3`, POSIX shell и терминал с `curses`. Для адаптера нужны Node 22.19+ и npm. Проверки выполнены на Python 3.13 и Node 24; минимальные версии и Windows отдельно не проверялись.
 
-## Board only (no Node needed)
-
-Requires Python 3.10+ on POSIX. Keep private run state outside the project; the server binds loopback only.
-
-```sh
-./bin/delm init /private/run --shared-workspace /path/to/project --n 2 --task 'Approved task'
-./bin/delm serve /private/run
-# another terminal: read-only curses view (q closes only the view)
-./bin/delm view /private/run
-./bin/delm view /private/run --once
-```
-
-`--n` supports 2/4/8 actors, not extra model calls. Optional `--plan /path/to/approved.md` freezes the authorized plan. Each actor receives ordinary START.md, shared WORKER.md and an authenticated `bin/context`. The view reads only the board, never agent sessions, execution activity or wait state. Claims are not proof a model is running.
-
-```sh
-/private/run/alice/bin/context domain '{"op":"snapshot","request_id":"read-001"}'
-# Read the returned view, then explicitly ACK its receipt_id.
-/private/run/alice/bin/context domain '{"op":"ack","request_id":"ack-001","receipt_id":"RETURNED_ID"}'
-```
-
-Lost response: replay **identical** request ID and payload. `pending` recovers unread receipts. Never ACK unread content. See [domain protocol](docs/DeLM-domain-protocol.md).
-
-## Stock Pi CLI (friends' installation)
-
-Requires Node >=22.19 (tested Node 24), Python, and public `@earendil-works/pi-coding-agent@1.4.0`. Install this checkout's exact dependencies locally:
+Только для адаптеров установите зафиксированные публичные зависимости:
 
 ```sh
 npm ci --ignore-scripts --no-audit --no-fund
-./bin/delm connect pi /private/run
 ```
 
-`connect pi` prints exact per-actor commands: approved working directory, actor context PATH, an explicit extension module and a separate recorded `--session` path. It prepares bindings only: no model, subprocess host, global edits or automatic attachment to an arbitrary running TUI. Repeat is safe; modified/incompatible bindings are refused without overwriting them. Use your existing `pi` executable (or this checkout's `node_modules/.bin/pi`), model/auth and policies. Start the board first. Submit the printed START.md instruction as the first prompt.
+## Создать и открыть доску
 
-The package's `pi.extensions` manifest contains **only** `adapters/durable/pi.mjs`. Loading it without any DeLM binding is inert and does not change unrelated Pi sessions. Partial or invalid bindings fail explicitly. Bound modules generated by connect call that factory directly. To load the package directory instead, set `DELM_RUN`, `DELM_ACTOR` and `DELM_SESSION_FILE` to the same explicit actor/session binding before `pi --extension /path/to/delm-board`. Never load both paths together. `npm pack` also produces a usable local package; no npm publication is needed. Public Pi may warn about pinned host-provided direct dependencies: this checkout deliberately pins its public 1.4.0 development/runtime baseline rather than relying on author's global packages.
+Выберите существующий проект и новый приватный каталог запуска **вне проекта и клона DeLM**. Измените `PROJECT` и текст задачи под свою работу:
 
-Tools:
+```sh
+export PROJECT="/absolute/path/to/your-project"
+export RUN="$HOME/.local/state/delm/my-first-run"
 
-- `delm_board({request: {...}})` invokes the actor-bound CLI with safe argv, never shell interpolation or model-visible tokens/config. Use domain stable IDs and fences.
-- `delm_wait({action:"wait",items:["exact-task-id"],reason:"..."})` arms and returns promptly. `action:"work"` waits for eligible work for a free actor. Finish the turn after arming; no model polling. `status` inspects saved state; `cancel` stops an armed watcher.
-
-### Pi wake limits and recovery
-
-Custom entries persist run/actor/workspace/session identity, stable wait ID/condition and attempt state. Startup and tree navigation restore the **active branch**. Switch, fork, reload and shutdown invalidate old callbacks before closing watchers. Recorded send intents in another branch of the same session remain a safety fence: rewinding cannot silently resend. A new/forked session cannot silently adopt the actor: it needs a separately reviewed binding/session command. Navigate back to the pending branch to restore its watcher.
-
-A board event produces a compact **follow-up user message**, using existing Pi model/auth. The wake references a snapshot; it does not read or ACK it. Pi `appendEntry` and `sendUserMessage` return void, with no atomic admission receipt: this is **not durable/exactly-once admission**. The adapter records `attempted` before sending. After a crash or asynchronous send rejection it never auto-resends; unread receipts survive. `status` reports whether the wake identifier is visible in the current branch, not proof of admission. After inspecting transcript and `pending`, `/delm-rearm EXACT_WAIT_ID` explicitly authorizes another attempt (which can duplicate a previously accepted wake). A successful explicit ACK of the current receipt, including via external context followed by status reconciliation, closes that cycle and permits a new wait; it never resends the old wake. Cancel cannot retract already attempted input.
-
-To detach Pi, exit/reload without this extension using Pi's supported lifecycle; shutdown closes watchers. Removing files alone cannot stop a running extension or retract input already submitted. Board receipts and sessions are not deleted.
-
-## Public Durable SDK library (not the Pi CLI)
-
-`@earendil-works/pi-durable@1.4.0` is a library with **no binary**. There is intentionally no `connect durable` command printing Pi commands. Its entry point returns a definition for the caller's **actual live registry**, never a cloned registry or a new Harness, storage owner, model or credential selection:
-
-```js
-import { createDurableAdapter, cancelAndDrain } from './adapters/durable/index.mjs';
-
-// registry, harness, root, context belong to YOUR existing application.
-const options = { run: '/private/run', actor: 'bob' };
-const adapter = createDurableAdapter(options);
-registry.install(adapter);
-// Needed when your host uses an explicit extension/tool selection:
-await root.configure({ extensions: { add: [adapter] } }, context);
-// root's effective environment.cwd (or agent.cwd without an environment)
-// must already equal the approved workspace. Only root conversation 1 is bound.
+"$DELM_ROOT/bin/delm" init "$RUN" \
+  --shared-workspace "$PROJECT" --n 2 \
+  --task 'Выполнить согласованную задачу и проверить результат'
 ```
 
-This definition provides both `delm_board` and `delm_wait`; direct board operations need **no shell tool or PATH**. Its prompt also identifies the absolute actor-bound CLI. The wait uses the caller's public scheduler/storage and stable input request IDs. Optional `admitInput(conversation, requestId, context, runtime)` retains an additional real caller admission policy; absence does not install an approval stub or bypass host policy.
+Если есть утверждённый план, добавьте `--plan /absolute/path/to/PLAN.md`. `--n` поддерживает 2, 4 и 8 участников, но не запускает модели. Повторный `init` существующего RUN откажет; для продолжения используйте прежний RUN.
 
-An empty public `createRegistry()` does **not** install coding/shell tools or an execution environment. If your application wants ordinary file/shell work, explicitly select its existing `CodingTools` and keep its existing caller-owned environment. For a caller configuring these for the first time, the public pieces are:
+**Терминал 1. Backend доски:**
 
-```js
-import { CodingTools } from '@earendil-works/pi-durable/tools';
-import { NodeExecutionEnv } from '@earendil-works/pi-durable/env/node';
-registry.install(CodingTools);
-await root.configure({ extensions: { add: [CodingTools] } }, context);
-// Caller-owned HarnessOptions.env, NOT installed/replaced by this adapter:
-const env = target => new NodeExecutionEnv({
-  cwd: target.cwd ?? '/path/to/project',
-  shellEnv: { ...process.env, PATH: '/private/run/bob/bin:' + process.env.PATH },
-});
-// Use env only in your own existing host configuration, respecting its policies.
+```sh
+"$DELM_ROOT/bin/delm" serve "$RUN"
 ```
 
-Workspace is checked at tool execution **and wake dispatch**, using the effective public execution environment, not merely `process.cwd()`. Keep one board binding per root/registry; do not install different actors under the same `delm` extension identity.
+Оставьте его открытым. HTTP-сервер слушает только loopback.
 
-### SDK detach
+**Терминал 2. Доска:** задайте те же абсолютные `DELM_ROOT` и `RUN`, затем:
 
-Quiesce new tool calls/input first (using your host's normal lifecycle), then remove the adapter from the conversation selection and drain its saved wait tasks **before** uninstalling its definition:
-
-```js
-await root.configure({ extensions: { remove: [adapter] } }, context);
-const outcomes = await cancelAndDrain(harness, options, context);
-registry.uninstall(adapter);
+```sh
+"$DELM_ROOT/bin/delm" view "$RUN"
 ```
 
-`cancelAndDrain` aborts/waits only this binding's recorded watcher tasks; it preserves unrelated tasks, host data and unread board receipts. It reports `alreadyAdmitted` separately. Accepted model input is not erased or reclassified as unsubmitted. Uninstall alone and ordinary conversation abort are not safe detach for background waits. The caller must prevent concurrent new arm calls while draining. Reinstall the definition before opening/resuming saved active waits.
+`q` закрывает только просмотр. Для разового текстового среза используйте `view "$RUN" --once`. Доска показывает владение задачами, а не доказательство работы модели.
 
-## Verification and attribution
+## Подключить публичный Pi CLI
 
-Run `npm run test:core`, `npm run test:sdk`, `npm run test:pi`, `npm run test:rpc`. Tests use disposable private workspaces/sessions and only deterministic local models. See [actual checks and scope](docs/verification.md), [MIT license](LICENSE), and [source notices](THIRD_PARTY_NOTICES.md). No private-host patches or author's runtime are required.
+Для настоящего Durable SDK используйте [отдельную инструкцию](docs/durable-sdk.md), а не этот раздел.
+
+В терминале подготовки задайте прежние `DELM_ROOT` и `RUN`:
+
+```sh
+export PATH="$DELM_ROOT/node_modules/.bin:$PATH"
+pi --version
+"$DELM_ROOT/bin/delm" connect pi "$RUN"
+```
+
+Ожидается публичный Pi `1.4.0`. `connect pi` напечатает команды для Alice, Bob и остальных участников. Сам он не запускает Pi, модели или новый хост и не меняет глобальную конфигурацию.
+
+1. Откройте отдельный терминал для каждого участника. Если используете локальный Pi из этого клона, добавьте тот же `$DELM_ROOT/node_modules/.bin` в `PATH` **в каждом терминале**.
+2. Выполните только команду нужного участника, начинающуюся с `cd`. Она содержит точную рабочую папку, расширение и `--session`.
+3. Первым сообщением передайте: `Прочитай свой START.md по пути, который напечатал connect, и выполни задачу в его рамках.` Лучше вставить полный напечатанный путь к `START.md`.
+4. При повторном открытии используйте прежнюю команду участника и ту же `--session`, а не общий `--continue`.
+
+Не передавайте весь вывод `connect` в `eval`: в нём есть пояснения, не являющиеся shell-командами. Повторный `connect` сохраняет совместимые привязки и отказывается перезаписывать изменённые файлы. Одного участника не следует одновременно открывать в нескольких процессах.
+
+Используются ваши модели и авторизация Pi. Если их нет, сначала настройте сам Pi обычным способом; не передавайте ключи агенту в чат.
+
+## Что делает участник
+
+- `delm_board` вызывает actor-bound CLI доски. Мутации требуют стабильного `request_id` и актуальных revision/generation.
+- `delm_wait` возвращает управление сразу после постановки ожидания. Он не держит модель в цикле опроса.
+- Событие доски возобновляет нужную беседу. Уведомление содержит ссылку на receipt, но не подтверждает чтение.
+- Участник читает snapshot, затем явно делает ACK. Только после этого использует результат и продолжает работу.
+
+Протокол, ограничения leases и восстановление receipts описаны в [справочнике доски](docs/DeLM-domain-protocol.md).
+
+## Ограничения и отключение
+
+У обычного Pi CLI отправка follow-up не имеет атомарной квитанции приёма. После неоднозначной попытки адаптер не делает автоматический дубль. Проверьте историю, `delm_wait status` и pending receipts; осознанный повтор доступен через `/delm-rearm EXACT_WAIT_ID`. Это не гарантия exactly-once после аварии. Явный ACK текущего receipt завершает цикл и позволяет поставить новое ожидание.
+
+Pi восстанавливает ожидание из активной ветки и отключает старые callbacks при смене ветки/сессии, reload и выходе. Fork не получает чужую привязку участника автоматически. Загрузка пакета без выбранного RUN неактивна и не ломает обычные сессии.
+
+Для отключения Pi завершите нужную сессию либо выполните поддержанный reload без расширения. Для Durable сначала остановите новые вызовы адаптера, отмените и дождитесь его wait-задач через `cancelAndDrain`, затем удалите extension из registry. [Точный порядок](docs/durable-sdk.md#отключить-адаптер). Удаление файлов само по себе не останавливает уже работающий код и не отзывает принятый input.
+
+Не публикуйте RUN: в нём находятся токены доски, конфигурация, receipts и сессии. Обычный `npm pack` исключает эти данные и Python bytecode. Этот проект не переключает и не обновляет другие установки DeLM.
+
+## Проверить установку
+
+Из корня Git-клона; тесты не входят в runtime-архив npm:
+
+```sh
+npm run test:core
+npm run test:sdk
+npm run test:pi
+npm run test:rpc
+npm run test:docs
+python3 tests/package.py
+```
+
+Тесты используют временные проекты и локальную детерминированную модель. Они не проверяют качество живых моделей, Windows или любую неизвестную установку. [Повторная проверка перед публикацией](docs/publication.md) и [исходная приёмка runtime](docs/verification.md).
+
+## Файлы для людей и агентов
+
+- [AGENTS.md](AGENTS.md): карта кода, команды и правила безопасного подключения.
+- [prompts/setup.md](prompts/setup.md): запрос агенту-установщику.
+- [prompts/worker.md](prompts/worker.md): запрос участнику существующего RUN.
+- [docs/durable-sdk.md](docs/durable-sdk.md): подключение к публичному Durable SDK.
+- [docs/architecture.md](docs/architecture.md): границы компонентов и схема пробуждения.
+
+Лицензия [MIT](LICENSE). Включены исходные [уведомления об авторстве](THIRD_PARTY_NOTICES.md) и [лицензия Python DeLM](board/vendor/DeLM/LICENSE). Это адаптация идеи DeLM, не официальный продукт авторов исследования.

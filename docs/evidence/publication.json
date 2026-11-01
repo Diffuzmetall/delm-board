@@ -1,0 +1,31 @@
+{
+  "scope": "public documentation and packaging; no adapter, board or CLI behavior change",
+  "runtimeUnchangedFrom": "36f3b15ebcdd36aa9e67c294fe8b8094487b8bef",
+  "runtimePaths": ["adapters", "board", "bin", "package-lock.json"],
+  "environment": {"node": "24.19.0", "python": "3.13.7", "publicPiDurable": "1.4.0"},
+  "checks": {
+    "core": {"passed": 34, "failed": 0},
+    "durableSdk": {"passed": 9, "failed": 0},
+    "piLifecycleAndUnconfiguredLoad": {"passed": 7, "failed": 0},
+    "realPublicCliRpc": "PASS",
+    "freshArchiveOwnDependencyInstall": "PASS",
+    "installedSdkLiveRegistry": "PASS",
+    "installedPublicCliRpc": "PASS",
+    "mermaidParser": {"passed": 3, "failed": 0},
+    "repositoryAndArchiveRelativeFileLinks": "PASS",
+    "runtimeAndLockfileUnchanged": "PASS"
+  },
+  "modelScope": "deterministic SDK fixture and loopback RPC provider only; 17 requests in each RPC run; no external model calls",
+  "promptReview": {
+    "method": "manual source-contract review plus deterministic packaging/link checks, not model behavior evaluation",
+    "cases": ["existing Durable SDK registry", "ordinary public Pi CLI", "standalone Python board", "unknown host must not be silently replaced"],
+    "requiredBoundaries": ["preserve existing host/session/config", "no unsanctioned model spending", "explicit snapshot read and ACK", "cancel/drain before SDK uninstall"]
+  },
+  "publication": {
+    "target": "Diffuzmetall/delm-board",
+    "authorization": "user explicitly requested public visibility for this repository only",
+    "remoteVisibilityEvidence": "verified separately after publication; this prepublication record is not remote proof",
+    "outgoingContentReview": "known token/private-key/private-path patterns, generated/runtime file exclusion, noreply Git identities; limited leak scan, not a security audit"
+  },
+  "limitations": ["minimum Python/Node versions not executed", "Windows not tested", "unknown friend application not tested", "inherited nonfatal SQLite ResourceWarning", "Pi follow-up has no atomic admission receipt or automatic retry after ambiguity"]
+}

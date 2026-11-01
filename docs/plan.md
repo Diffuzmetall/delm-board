@@ -1,5 +1,7 @@
 # Portable DeLM board and public Pi/Durable 1.4 adapter
 
+> Historical plan for the first private delivery. The separately authorized public documentation/release scope is recorded in [publication.md](publication.md). This plan does not grant an installer permission to publish anything.
+
 ## Outcome and authority
 
 Build for friends who use their own public installation, not the author's host. Deliver the existing DeLM task board as a standalone Python component and a detachable integration package. Target the current public npm release, 1.4.0, verified with `npm view` for both pi-durable and pi-coding-agent. Publish only to a new PRIVATE `Diffuzmetall/delm-board` repository. Do not change either existing public DeLM repository, author runtime, global configuration, credentials, or existing sessions. No live-model calls, npm publication, deployment, or upstream patch.

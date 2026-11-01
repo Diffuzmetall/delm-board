@@ -1,5 +1,7 @@
 # Local verification
 
+> Historical runtime acceptance record. For the later public documentation/package recheck, see [publication.md](publication.md). File counts and candidate descriptions below retain their original scope.
+
 Candidate: local uncommitted `delm-board` 0.1.0, extracted from committed `pi-durable-delm` `daf23adc433181c21baaad8222f5b7c4d6827c07`. No publication or independent final acceptance is claimed here; the parent owns those steps.
 
 Public direct dependencies installed from this checkout's own package/lockfile: `@earendil-works/pi-durable`, `pi-coding-agent`, `pi-ai`, `chord`, all **1.4.0**. Runtime used: Node **v24.19.0**, Python **3.13**. Installed stock executable resolves to `@earendil-works/pi-coding-agent/dist/bundle/cli.js`, not a source CLI or custom host.
