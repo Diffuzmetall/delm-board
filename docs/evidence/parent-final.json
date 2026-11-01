@@ -1,0 +1,47 @@
+{
+  "result": "PASS",
+  "archiveFiles": 26,
+  "archiveHygiene": "PASS",
+  "freshOwnInstall": "PASS",
+  "unconfiguredStockLoad": "PASS",
+  "sdk": "installed SDK live-registry factory PASS",
+  "installedStockRPC": {
+    "result": "PASS",
+    "publicVersion": "1.4.0",
+    "binary": "pi-coding-agent/dist/bundle/cli.js",
+    "checks": [
+      "repeat-connect-no-model",
+      "real-extension-loader",
+      "model-board-projection",
+      "nonblocking-arm",
+      "event-follow-up",
+      "snapshot-read-ACK",
+      "new-wait-cycle",
+      "RPC-fork-refusal",
+      "RPC-switch-restore",
+      "cancel",
+      "orderly-shutdown"
+    ],
+    "waitCycleSeconds": 0.026,
+    "loopbackModelRequests": 17,
+    "lifecycleScope": "tree/reload/uncertain-send seams separately use genuine AgentSession API"
+  },
+  "terminalView": {
+    "result": "PASS",
+    "surface": "actual POSIX PTY and curses",
+    "taskRendered": true,
+    "quitClosedOnlyView": true,
+    "boardBackendStayedAlive": true,
+    "boardSqliteHashesUnchanged": true
+  },
+  "parentPiTests": {
+    "command": "HOME=$(mktemp -d) env -u DELM_RUN -u DELM_ACTOR -u DELM_SESSION_FILE npm run test:pi",
+    "passed": 7,
+    "failed": 0
+  },
+  "regression": {
+    "redObserved": true,
+    "reason": "Unconfigured public extension loader failed before correction",
+    "fixed": "No binding selected leaves the extension inert; explicit partial bindings remain invalid"
+  }
+}

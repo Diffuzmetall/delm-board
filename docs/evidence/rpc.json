@@ -1,0 +1,21 @@
+{
+  "result": "PASS",
+  "publicVersion": "1.4.0",
+  "binary": "pi-coding-agent/dist/bundle/cli.js",
+  "checks": [
+    "repeat-connect-no-model",
+    "real-extension-loader",
+    "model-board-projection",
+    "nonblocking-arm",
+    "event-follow-up",
+    "snapshot-read-ACK",
+    "new-wait-cycle",
+    "RPC-fork-refusal",
+    "RPC-switch-restore",
+    "cancel",
+    "orderly-shutdown"
+  ],
+  "waitCycleSeconds": 0.026,
+  "loopbackModelRequests": 17,
+  "lifecycleScope": "tree/reload/uncertain-send seams separately use genuine AgentSession API"
+}

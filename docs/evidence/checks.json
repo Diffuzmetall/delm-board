@@ -1,0 +1,27 @@
+{
+  "candidate": "delm-board 0.1.0 local uncommitted",
+  "sourceRevision": "daf23adc433181c21baaad8222f5b7c4d6827c07",
+  "runtime": { "node": "v24.19.0", "python": "3.13.7" },
+  "publicDirectDependencies": {
+    "@earendil-works/chord": "1.4.0",
+    "@earendil-works/pi-ai": "1.4.0",
+    "@earendil-works/pi-coding-agent": "1.4.0",
+    "@earendil-works/pi-durable": "1.4.0"
+  },
+  "checks": [
+    { "command": "npm install --ignore-scripts --no-audit --no-fund", "exit": 0, "packagesAdded": 124 },
+    { "command": "npm ls --depth=0", "exit": 0 },
+    { "command": "HOME=$(mktemp -d) npm run test:core", "exit": 0, "tests": 34, "passed": 34, "note": "Nonfatal inherited SQLite ResourceWarnings under Python 3.13" },
+    { "command": "HOME=$(mktemp -d) node --test tests/sdk.test.mjs tests/pi.test.mjs", "exit": 0, "tests": 15, "passed": 15 },
+    { "command": "HOME=$(mktemp -d) node --test --test-name-pattern='live registry model-driven' tests/sdk.test.mjs", "exit": 0, "tests": 1, "passed": 1, "note": "Final additional assertion: all existing caller transcript IDs retained through active detach" },
+    { "command": "python3 tests/rpc.py", "exit": 0, "evidence": "rpc.json" },
+    { "command": "python3 tests/package.py", "exit": 0, "evidence": "package.json" }
+  ],
+  "limitations": [
+    "Pi void follow-up API is not atomic durable admission; uncertain attempts require explicit inspection/rearm, or a new cycle after explicit receipt ACK",
+    "RPC covers fork/switch, but tree/reload/compaction rejection seams use genuine public AgentSession API, not CLI/RPC coverage",
+    "SDK detach requires caller quiescence, cancellation/drain before uninstall; admitted input is not retracted",
+    "Board-only terminal view does not read host execution/wait state",
+    "Independent final acceptance and publication belong to parent; neither performed here"
+  ]
+}

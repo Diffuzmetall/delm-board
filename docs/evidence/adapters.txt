@@ -1,0 +1,23 @@
+✔ real AgentSession: arm/event/follow-up/readACK permits a new wait (1858.94917ms)
+✔ real AgentSession tree navigation drops abandoned wait and restores pending branch (1478.170167ms)
+✔ real AgentSession reload restores armed wait; attempted send never automatically resends (1841.368889ms)
+✔ real AgentSession fork file and replacement workspace cannot inherit actor (780.499857ms)
+✔ persisted interruption between attempt marker and send requires explicit recovery (1239.653161ms)
+✔ real AgentSession asynchronous send rejection during compaction retains uncertain intent (1560.731298ms)
+✔ native registry refuses missing binding; no importer starts services (3.770033ms)
+✔ native SDK admission delivers same-conversation wake without an author-private policy (687.425694ms)
+✔ real SDK SQLite + faux model: exact dependency wake in same conversation; unrelated events ignored (993.75472ms)
+✔ ready at arm, invalid dependency, cross-conversation and cancellation (666.362154ms)
+✔ reopen persisted native watch, same request identity, no duplicate wake after second reopen (593.428476ms)
+✔ temporary SQLite writer lock keeps the native wait armed and wakes after unlock (1172.334419ms)
+✔ trusted admission denial does not submit a wake (504.882725ms)
+✔ live registry model-driven board operations, snapshot ACK, active detach preserves unrelated tasks (2770.079982ms)
+✔ effective conversation environment guard rejects tool and wake despite correct process cwd (1107.054761ms)
+ℹ tests 15
+ℹ suites 0
+ℹ pass 15
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 10306.271198
