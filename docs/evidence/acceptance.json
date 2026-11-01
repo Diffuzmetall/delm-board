@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "verdict": "ACCEPTED_LOCAL_CANDIDATE",
+  "candidate_commit": "60bdf028d2f9f03d9282f6a3b0fbd49e8db1ef8d",
+  "reviewer": "delm-portable-final-acceptance",
+  "independent_context": true,
+  "material_defects": [],
+  "required_fixes": [],
+  "review_checks": [
+    "Exact candidate HEAD and clean tracked tree",
+    "All 24 runtime SHA256 records matched checkout bytes",
+    "Installed public packages are 1.4.0 and stock CLI resolves to dist/bundle/cli.js",
+    "Connected product implementation, tests, evidence and relevant public API reviewed"
+  ],
+  "review_runtime_tests_rerun": false,
+  "covered_evidence": {
+    "core_tests_passed": 34,
+    "durable_sdk_tests_passed": 9,
+    "pi_tests_passed": 7,
+    "fresh_package_install_and_actual_stock_rpc": "PASS",
+    "unconfigured_stock_package_load": "PASS",
+    "actual_terminal_view": "PASS",
+    "reports": ["checks.json", "parent-final.json", "final-runtime-sha256.json"]
+  },
+  "preservation": {
+    "original_head_before_and_after": "daf23adc433181c21baaad8222f5b7c4d6827c07",
+    "original_dirty_path_set_unchanged": true,
+    "classic_head_before_and_after": "cc0b2b06035a09c991f9a788dfeeb12ac1a970bd",
+    "classic_worktree_clean": true,
+    "parent_no_write_attestation": "This task wrote only the new delm-board checkout and disposable test fixtures; no commits, pushes, config or source edits to either existing public repository",
+    "original_dirty_file_byte_equality_independently_proven": false
+  },
+  "limits": [
+    "Local acceptance is not publication approval or verification",
+    "Private publication and remote SHA/visibility verification remain parent-owned",
+    "Pi void send API cannot provide atomic/exactly-once admission; ambiguous attempts require explicit recovery",
+    "Tree/reload/uncertain-send seams use genuine AgentSession APIs, not RPC",
+    "Minimum Node/Python versions were not runtime-tested",
+    "Original dirty-file preservation relies on HEAD/status evidence plus parent no-write attestation"
+  ]
+}

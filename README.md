@@ -2,6 +2,17 @@
 
 A standalone Python task board with two **different**, detachable adapters for public Pi 1.4.0. The board is the existing DeLM domain/event implementation, not a replacement agent host. Task fences, stable request IDs, advisory leases and explicit snapshot/read/ACK remain authoritative.
 
+## Get the private checkout
+
+The repository owner must grant your GitHub account access first. Clone with your existing GitHub authentication:
+
+```sh
+git clone git@github.com:Diffuzmetall/delm-board.git
+cd delm-board
+```
+
+The board-only path below needs no npm installation. Install the public Node dependencies only for an adapter.
+
 ## Board only (no Node needed)
 
 Requires Python 3.10+ on POSIX. Keep private run state outside the project; the server binds loopback only.

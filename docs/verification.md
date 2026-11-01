@@ -21,7 +21,7 @@ The parent found an onboarding defect after the implementation handoff: loading 
 
 - Parent PTY check: the actual curses view displayed a synthetic task, `q` closed only the view, the board backend stayed alive, and both board SQLite file hashes were unchanged.
 
-Board and SDK implementation files were unchanged by this parent correction. Their recorded implementation checks remain applicable. Independent final review is recorded separately before delivery; no exactly-once Pi admission or production deployment is inferred.
+Board and SDK implementation files were unchanged by this parent correction. Their recorded implementation checks remain applicable. Independent final review accepted candidate `60bdf028d2f9f03d9282f6a3b0fbd49e8db1ef8d` with no material defects or required fixes. The reviewer matched all 24 runtime hashes and inspected the implementation, tests, evidence and public APIs without rerunning runtime suites. See [acceptance record](evidence/acceptance.json). That local verdict does not verify publication, exactly-once Pi admission or production deployment.
 
 ## Evidence and scope
 
